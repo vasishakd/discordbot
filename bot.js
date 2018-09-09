@@ -87,7 +87,7 @@ client.on('message', message => {
         botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
     }
     if (message.content == 'current') {
-        message.channel.send('Текущий отслеживаемыцй канал: ' + botconfig.channel_gg);
+        message.channel.send('Текущий отслеживаемый канал: ' + botconfig.channel_gg);
     }
 });
 
