@@ -60,16 +60,17 @@ client.on('ready', () => {
 });
 
 client.on('message', message => {
-    if (!message.content.startsWith(prefix) || message.author.bot) return;
+    if (!message.content.startsWith(prefix) || message.author.bot
+        || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
+    message.content = message.content.slice(1);
     let params = message.content.split(' ');
-    if (message.content === prefix + 'ping') {
-        message.channel.send(message.channel.id);
-    }
-    if (params.length == 2 && params[0] == prefix + 'notify'
-        && message.member.roles.some(r => ["moderator"].includes(r.name))) {
+    if (params.length == 2 && params[0] == 'notify') {
         rewriteJson(message.channel.id, params[1]);
         message.channel.send('Канал ' + params[1] + ' отслеживается');
         botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
+    }
+    if (message.content == 'current') {
+        message.channel.send('Текущий отслеживаемыцй канал: ' + botconfig.channel_gg);
     }
 });
 
