@@ -1,69 +1,77 @@
-const botconfig = require("./botconfig.json");
+let fs = require('fs');
+let botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
 const Discord = require("discord.js");
+const path = require('path');
 const client = new Discord.Client();
 const prefix = botconfig.prefix;
-const TwitchWebhook = require('twitch-webhook')
- 
-const twitchWebhook = new TwitchWebhook({
-    client_id: 'azimmnurr17ca1kn1vsiwqeimhpob9',
-    callback: 'http://18.185.154.61/bot.js',
-    secret: 'erzxvfbydoln1bb500u0rhk5bvorxa', // default: false
-    lease_seconds: 259200,    // default: 864000 (maximum value)
-})
- 
-// set listener for all topics
-twitchWebhook.on('*', ({ topic, options, endpoint, event }) => {
-    // topic name, for example "streams"
-    console.log(topic)
-    // topic options, for example "{user_id: 12826}"
-    console.log(options)
-    // full topic URL, for example
-    // "https://api.twitch.tv/helix/streams?user_id=12826"
-    console.log(endpoint)
-    // topic data, timestamps are automatically converted to Date
-    console.log(event)
-})
- 
-// set listener for topic
-twitchWebhook.on('users/follows', ({ event }) => {
-    console.log(event)
-})
- 
-// subscribe to topic
-twitchWebhook.subscribe('users/follows', {
-    first: 1,
-    from_id: 148731820 // ID of Twitch Channel ¯\_(ツ)_/¯
-})
- 
-// renew the subscription when it expires
-twitchWebhook.on('unsubscibe', (obj) => {
-  twitchWebhook.subscribe(obj['hub.topic'])
-})
- 
-// tell Twitch that we no longer listen
-// otherwise it will try to send events to a down app
-process.on('SIGINT', () => {
-  // unsubscribe from all topics
-  twitchWebhook.unsubscribe('*')
- 
-  // or unsubscribe from each one individually
-  twitchWebhook.unsubscribe('users/follows', {
-    first: 1,
-    to_id: 12826
-  })
- 
-  process.exit(0)
-})
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+let isLive = false;
+let timer;
+
+// function startTimerTwitch() {
+// 	let xhr = new XMLHttpRequest();
+// 	xhr.open("GET", 'https://api.twitch.tv/kraken/streams/148731820', false);
+// 	xhr.setRequestHeader('Client-ID', 'azimmnurr17ca1kn1vsiwqeimhpob9');
+// 	xhr.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
+// 	xhr.onreadystatechange = function() {
+// 		if (this.readyState == 4 && this.status == 200) {
+// 			data = JSON.parse(xhr.responseText);
+//             console.log(data.stream);
+//             clearInterval(timer);
+//         }
+// 	};
+// 	xhr.send();
+// }
+
+function startTimerGG() {
+  console.log(botconfig);
+	let xhr = new XMLHttpRequest();
+	xhr.open("GET", 'http://api2.goodgame.ru/streams/' + botconfig.channel_gg, true);
+	xhr.setRequestHeader('Accept', 'application/json');
+	xhr.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			data = JSON.parse(xhr.responseText);
+			if (data.status == 'Live' && isLive == false) {
+				client.channels.get(botconfig.channel_discord).send('@everyone '+ data.url + ' go live');
+				isLive = true;
+			}
+			if (data.status == 'Dead' && isLive == true) {
+				isLive = false;
+			}
+        }
+	};
+	xhr.send();
+}
+
+function rewriteJson(discord, channel) {
+  let content;
+  let contents = fs.readFileSync('botconfig.json', 'utf8');
+  content = JSON.parse(contents);
+  content.channel_discord = discord;
+  content.channel_gg = channel;
+  content = JSON.stringify(content);
+  fs.writeFileSync("botconfig.json", content);
+
+}
 
 client.on('ready', () => {
+  timer = setInterval(startTimerGG, 10000);
   console.log(`Logged in as ${client.user.tag}!`);
   client.user.setActivity("Alive");
 });
 
-client.on('message', msg => {
-  if (msg.content === prefix + 'ping') {
-    client.channels.get('488064339421691936').send('@everyone Pong')
+client.on('message', message => {
+  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  let params = message.content.split(' ');
+  if (message.content === prefix + 'ping') {
+    message.channel.send(message.channel.id);
   }
-});
+  if (params.length == 2 && params[0] == prefix + 'notify') {
+    rewriteJson(message.channel.id, params[1]);
+    message.channel.send('Канал '+ params[1] + ' отслеживается');
+    botconfig = botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
+  }
+  });
 
 client.login(botconfig.token);
+
