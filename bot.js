@@ -24,7 +24,6 @@ let timer;
 // }
 
 function startTimerGG() {
-  console.log(botconfig);
 	let xhr = new XMLHttpRequest();
 	xhr.open("GET", 'http://api2.goodgame.ru/streams/' + botconfig.channel_gg, true);
 	xhr.setRequestHeader('Accept', 'application/json');
