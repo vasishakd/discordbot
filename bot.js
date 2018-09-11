@@ -37,7 +37,7 @@ function startTimerGG() {
                         .setTitle('Stream online')
                         .setURL(data.url)
                         .setAuthor(data.key, null, data.url)
-                        .setDescription('Hey @everyone ' + data.key + ' is now live!')
+                        .setDescription('Hey @everyone ' + data.key + ' is now live! ' + data.url)
                         .setImage('https:' + data.channel.thumb)
                         .setTimestamp();
                     client.channels.get(botconfig.channel_discord).send(embed);
