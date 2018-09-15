@@ -1,4 +1,5 @@
-botconfig.json
 /node_modules
 .node-xml*
 .idea/
+botconfig.json
+
