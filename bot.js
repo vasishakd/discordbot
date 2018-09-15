@@ -74,12 +74,14 @@ client.on('message', message => {
     if (message.content == 'current') {
         message.channel.send('Текущий отслеживаемый канал: ' + botconfig.channel_gg);
     }
-    if (params.length ==2 && params[0] == 'setactivity') {
-        client.user.setActivity(params[1]);
+    if (params.length > 1 && params[0] == 'setactivity') {
+        params.shift();
+        let activity = params.join(' ');
+        client.user.setActivity(activity);
         let content;
         let contents = fs.readFileSync('botconfig.json', 'utf8');
         content = JSON.parse(contents);
-        content.activity = params[1];
+        content.activity = activity;
         content = JSON.stringify(content);
         fs.writeFileSync("botconfig.json", content);
     }
