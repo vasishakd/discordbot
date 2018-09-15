@@ -8,21 +8,6 @@ let isLive = false;
 let timer;
 let embed;
 
-// function startTimerTwitch() {
-// 	let xhr = new XMLHttpRequest();
-// 	xhr.open("GET", 'https://api.twitch.tv/kraken/streams/148731820', false);
-// 	xhr.setRequestHeader('Client-ID', 'azimmnurr17ca1kn1vsiwqeimhpob9');
-// 	xhr.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
-// 	xhr.onreadystatechange = function() {
-// 		if (this.readyState == 4 && this.status == 200) {
-// 			data = JSON.parse(xhr.responseText);
-//             console.log(data.stream);
-//             clearInterval(timer);
-//         }
-// 	};
-// 	xhr.send();
-// }
-
 function startTimerGG() {
     if (botconfig.channel_discord != '' && botconfig.channel_gg != '') {
         let xhr = new XMLHttpRequest();
@@ -65,7 +50,7 @@ function rewriteJson(discord, channel) {
 client.on('ready', () => {
     timer = setInterval(startTimerGG, 10000);
     console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity("Watching you");
+    client.user.setActivity(botconfig.activity);
 });
 
 client.on('message', message => {
@@ -88,6 +73,15 @@ client.on('message', message => {
     }
     if (message.content == 'current') {
         message.channel.send('Текущий отслеживаемый канал: ' + botconfig.channel_gg);
+    }
+    if (params.length ==2 && params[0] == 'setactivity') {
+        client.user.setActivity(params[1]);
+        let content;
+        let contents = fs.readFileSync('botconfig.json', 'utf8');
+        content = JSON.parse(contents);
+        content.activity = params[1];
+        content = JSON.stringify(content);
+        fs.writeFileSync("botconfig.json", content);
     }
 });
 
