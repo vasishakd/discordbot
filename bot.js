@@ -25,7 +25,7 @@ function startTimerGG() {
                         .setDescription('Hey @everyone ' + data.key + ' is now live! ' + data.url)
                         .setImage('https:' + data.channel.thumb)
                         .setTimestamp();
-                    client.channels.get(botconfig.channel_discord).send(embed);
+                    client.channels.get(botconfig.channel_discord).send("@everyone", embed);
                     isLive = true;
                 }
                 if (data.status == 'Dead' && isLive == true) {
