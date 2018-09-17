@@ -57,6 +57,11 @@ client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot
         || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
     message.content = message.content.slice(1);
+    console.log(message.member.user.tag);
+    if (message.member.user.tag == 'Захар#6967') {
+        const emoji = message.guild.emojis.find('name', 'hahaa');
+        message.react(emoji);
+    }
     let params = message.content.split(' ');
     if (params.length == 3 && params[0] == 'notify' && params[1] == 'delete'
         && params[2] == botconfig.channel_gg) {
