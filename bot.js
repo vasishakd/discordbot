@@ -54,10 +54,7 @@ client.on('ready', () => {
 });
 
 client.on('message', message => {
-    if (message.member.user.tag == 'Захар#6967' 
-            || message.member.user.tag == '3axap#6967'
-            || message.member.user.tag == '3ахар#6967' 
-            || message.member.user.tag == 'derKotik#3467') {
+    if (message.member.user.tag == '3axap#6967') {
         const emoji = message.guild.emojis.find('name', 'hahaa');
         message.react(emoji);
     }
