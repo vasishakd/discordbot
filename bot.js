@@ -54,7 +54,7 @@ client.on('ready', () => {
 });
 
 client.on('message', message => {
-    if (message.member.user.id == '308904416793329665') {
+    if (message.member.user.id == '459470736826957824') {
         const emoji = message.guild.emojis.find('name', 'hahaa');
         message.react(emoji);
     }
