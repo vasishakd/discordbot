@@ -53,6 +53,10 @@ client.on('ready', () => {
     client.user.setActivity(botconfig.activity);
 });
 
+client.on("messageDelete", (messageDelete) => {
+    client.channels.get('496339158525018122').send(`The message : "${messageDelete.content}" by ${messageDelete.author.tag} was deleted.`)
+});
+
 client.on('message', message => {
     if (message.member.user.id == '459470736826957824') {
         const emoji = message.guild.emojis.find('name', 'hahaa');
