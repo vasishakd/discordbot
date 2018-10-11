@@ -1,22 +1,30 @@
 let fs = require('fs');
-let botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
-const Discord = require("discord.js");
-const client = new Discord.Client();
-const prefix = botconfig.prefix;
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+let botconfig = require('./botconfig.json');
 let isLive = false;
 let timer;
 let embed;
+const Discord = require("discord.js");
+const prefix = botconfig.prefix;
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const client = new Discord.Client();
+client.commands = new Discord.Collection();
 
-function startTimerGG() {
-    if (botconfig.channel_discord != '' && botconfig.channel_gg != '') {
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
+
+function checkChannelOnline() {
+    if (botconfig.channel_discord !== '' && botconfig.channel_gg !== '') {
         let xhr = new XMLHttpRequest();
         xhr.open("GET", 'http://api2.goodgame.ru/streams/' + botconfig.channel_gg, true);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
+            if (this.readyState === 4 && this.status === 200) {
                 data = JSON.parse(xhr.responseText);
-                if (data.status == 'Live' && isLive == false) {
+                if (data.status === 'Live' && isLive === false) {
                     embed = new Discord.RichEmbed()
                         .setColor('#233056')
                         .setTitle('Stream online')
@@ -28,7 +36,7 @@ function startTimerGG() {
                     client.channels.get(botconfig.channel_discord).send("@everyone", embed);
                     isLive = true;
                 }
-                if (data.status == 'Dead' && isLive == true) {
+                if (data.status === 'Dead' && isLive === true) {
                     isLive = false;
                 }
             }
@@ -37,58 +45,35 @@ function startTimerGG() {
     }
 }
 
-function rewriteJson(discord, channel) {
-    let content;
-    let contents = fs.readFileSync('botconfig.json', 'utf8');
-    content = JSON.parse(contents);
-    content.channel_discord = discord;
-    content.channel_gg = channel;
-    content = JSON.stringify(content);
-    fs.writeFileSync("botconfig.json", content);
+function requireUncached(module){
+    delete require.cache[require.resolve(module)];
+    return require(module);
 }
 
 client.on('ready', () => {
-    timer = setInterval(startTimerGG, 10000);
+    timer = setInterval(checkChannelOnline, 10000);
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity(botconfig.activity);
 });
 
 client.on('message', message => {
-    if (message.member.user.id == '459470736826957824') {
-        const emoji = message.guild.emojis.find('name', 'hahaa');
-        message.react(emoji);
-    }
     if (!message.content.startsWith(prefix) || message.author.bot
         || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
-    message.content = message.content.slice(1);
-    let params = message.content.split(' ');
-    if (params.length == 3 && params[0] == 'notify' && params[1] == 'delete'
-        && params[2] == botconfig.channel_gg) {
-        rewriteJson('', '');
-        message.channel.send('Канал ' + params[2] + ' больше не отслеживается');
-        botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
+
+    const args = message.content.slice(prefix.length).split(' ');
+    const command = args.shift().toLowerCase();
+
+    if (!client.commands.has(command)) return;
+
+    try {
+        client.commands.get(command).execute(client, message, args, botconfig);
+        botconfig = requireUncached('./botconfig.json');
     }
-    else if (params.length == 3 && params[0] == 'notify' && params[1] == 'delete') 
-        message.channel.send('Неверное имя канала');
-    if (params.length == 2 && params[0] == 'notify') {
-        rewriteJson(message.channel.id, params[1]);
-        message.channel.send('Канал ' + params[1] + ' отслеживается');
-        botconfig = JSON.parse(fs.readFileSync('botconfig.json', 'utf8'));
+    catch (error) {
+        console.error(error);
+        message.reply('there was an error trying to execute that command!');
     }
-    if (message.content == 'current') {
-        message.channel.send('Текущий отслеживаемый канал: ' + botconfig.channel_gg);
-    }
-    if (params.length > 1 && params[0] == 'setactivity') {
-        params.shift();
-        let activity = params.join(' ');
-        client.user.setActivity(activity);
-        let content;
-        let contents = fs.readFileSync('botconfig.json', 'utf8');
-        content = JSON.parse(contents);
-        content.activity = activity;
-        content = JSON.stringify(content);
-        fs.writeFileSync("botconfig.json", content);
-    }
+
 });
 
 client.login(botconfig.token);
