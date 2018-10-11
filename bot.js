@@ -56,6 +56,10 @@ client.on('ready', () => {
     client.user.setActivity(botconfig.activity);
 });
 
+client.on("messageDelete", (messageDelete) => {
+    client.channels.get('496339158525018122').send(`The message : "${messageDelete.content}" by ${messageDelete.author.tag} was deleted.`)
+});
+
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot
         || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
