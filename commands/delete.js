@@ -1,6 +1,6 @@
 module.exports = {
     name: 'delete',
-    description: 'Delete channel from notify. Example: !delete',
+    description: 'Delete channel from notify.',
     execute(message) {
         message.channel.send('Канал ' + botconfig.channel_gg + ' больше не отслеживается');
         rewriteJson('', '');
