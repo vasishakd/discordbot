@@ -61,11 +61,6 @@ client.on("messageDelete", (messageDelete) => {
 });
 
 client.on('message', message => {
-    if (message.member.roles.some(role => role.name === botconfig.reaction_role)) {
-        const emoji = message.guild.emojis.find('name', 'hahaa');
-        message.react(emoji);
-    }
-
     if (!message.content.startsWith(prefix) || message.author.bot
         || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
 
