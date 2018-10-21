@@ -35,6 +35,7 @@ function checkChannelOnline() {
                         .setTimestamp();
                     client.channels.get(botconfig.channel_discord).send("@everyone", embed);
                     isLive = true;
+                    saveStreamDate();
                 }
                 if (data.status === 'Dead' && isLive === true) {
                     isLive = false;
@@ -70,7 +71,7 @@ client.on('message', message => {
     if (!client.commands.has(command)) return;
 
     try {
-        client.commands.get(command).execute(client, message, args, botconfig);
+        client.commands.get(command).execute(client, message, args, botconfig, isLive);
         botconfig = requireUncached('./botconfig.json');
     }
     catch (error) {
@@ -82,3 +83,14 @@ client.on('message', message => {
 
 client.login(botconfig.token);
 
+function saveStreamDate()
+{
+    const Writer = require('./writer.js');
+    let moment = require('moment');
+    let now = moment().format('DD.MM.YYYY HH:mm:ss')
+    let config = {
+        last_stream_date: now
+    };
+    let writer = new Writer();
+    writer.writeFile('./botconfig.json', config);
+}
