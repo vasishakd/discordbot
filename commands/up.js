@@ -2,7 +2,7 @@ module.exports = {
     name: 'up',
     description: 'Display current stream time.',
     execute(client, message, args, botconfig, isLive) {
-        if (!isLive) {
+        if (isLive) {
             let now = new Date();
             let last = new Date(botconfig.last_stream_date);
             let diff = now - last;

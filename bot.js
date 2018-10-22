@@ -1,6 +1,6 @@
 let fs = require('fs');
 let botconfig = require('./botconfig.json');
-let isLive = false;
+let isLive = true;
 let timer;
 let embed;
 const Discord = require("discord.js");
