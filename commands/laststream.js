@@ -3,9 +3,10 @@ module.exports = {
     description: 'Last stream date.',
     execute(client, message, args, botconfig) {
         if (botconfig.last_stream_date) {
-            message.channel.send('Дата последнего стрима: ' + botconfig.last_stream_date);
+            let date = new Date(botconfig.last_stream_date).toLocaleDateString();
+            message.channel.send('Дата последнего стрима: ' + date);
         } else {
-            message.channel.send('Хуй его знает');
+            message.channel.send('Неизвестно');
         }
 
     },

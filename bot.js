@@ -86,10 +86,10 @@ client.login(botconfig.token);
 function saveStreamDate()
 {
     const Writer = require('./writer.js');
-    let moment = require('moment');
-    let now = moment().format('DD.MM.YYYY HH:mm:ss')
+    let now = new Date();
+    console.log(now);
     let config = {
-        last_stream_date: now
+        last_stream_date: now.toISOString()
     };
     let writer = new Writer();
     writer.writeFile('./botconfig.json', config);
