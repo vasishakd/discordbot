@@ -1,5 +1,6 @@
 let fs = require('fs');
 let botconfig = require('./botconfig.json');
+let xp = require("./xp.json");
 let isLive = true;
 let timer;
 let embed;
@@ -46,7 +47,7 @@ function checkChannelOnline() {
     }
 }
 
-function requireUncached(module){
+function requireUncached(module) {
     delete require.cache[require.resolve(module)];
     return require(module);
 }
@@ -62,8 +63,12 @@ client.on("messageDelete", (messageDelete) => {
 });
 
 client.on('message', message => {
-    if (!message.content.startsWith(prefix) || message.author.bot
-        || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
+
+    if (message.author.bot) return;
+
+    addXp(message.author.id);
+
+    if (!message.content.startsWith(prefix) || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
 
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
@@ -83,14 +88,38 @@ client.on('message', message => {
 
 client.login(botconfig.token);
 
-function saveStreamDate()
-{
+function saveStreamDate() {
     const Writer = require('./writer.js');
     let now = new Date();
-    console.log(now);
     let config = {
         last_stream_date: now.toISOString()
     };
     let writer = new Writer();
     writer.writeFile('./botconfig.json', config);
+}
+
+function addXp(authorId) {
+    let xpAdd = 25;
+
+    if (!xp[authorId]) {
+        xp[authorId] = {
+            xp: 0,
+            level: 1
+        };
+    }
+
+    let curxp = xp[authorId].xp;
+    let curLvl = xp[authorId].level;
+    let nxtLvl = xp[authorId].level * 250;
+
+    xp[authorId].xp = curxp + xpAdd;
+
+    if (nxtLvl <= xp[authorId].xp) {
+        xp[authorId].xp = 0;
+        xp[authorId].level = curLvl + 1;
+    }
+
+    fs.writeFile("./xp.json", JSON.stringify(xp), (err) => {
+        if (err) console.log(err)
+    });
 }
