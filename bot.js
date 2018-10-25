@@ -32,7 +32,7 @@ function checkChannelOnline() {
                         .setURL(data.url)
                         .setAuthor(data.key, null, data.url)
                         .setDescription('Hey @everyone ' + data.key + ' is now live! ' + data.url)
-                        .setImage('https:' + data.channel.thumb)
+                        .setImage('http:' + data.channel.thumb)
                         .setTimestamp();
                     client.channels.get(botconfig.channel_discord).send("@everyone", embed);
                     isLive = true;
@@ -68,7 +68,7 @@ client.on('message', message => {
 
     addXp(message.author.id);
 
-    if (!message.content.startsWith(prefix) || !message.member.roles.some(r => ["moderator"].includes(r.name))) return;
+    if (!message.content.startsWith(prefix)) return;
 
     const args = message.content.slice(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
