@@ -8,8 +8,10 @@ const Discord = require("discord.js");
 const prefix = botconfig.prefix;
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const client = new Discord.Client();
-client.commands = new Discord.Collection();
+let express = require('express');
+let app = express();
 
+client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
@@ -123,3 +125,33 @@ function addXp(authorId) {
         if (err) console.log(err)
     });
 }
+
+app.use(express.static('public'));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+app.listen(1337, function(){
+    console.log('Express server listening on port 1337');
+});
+
+app.get('/api/top', function (req, res) {
+    let top = [];
+    let username;
+
+    for (user in xp) {
+        if (client.users.get(user)) {
+            username = client.users.get(user).username;
+            top.push({name: username, level: xp[user].level});
+        }
+    }
+
+    top.sort(function (a, b) {
+        return b.level - a.level;
+    });
+
+    res.jsonp(top);
+});
