@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", 'http://localhost:1337/api/top', true);
+    xhr.open("GET", 'http://localhost:5000/api/top', true);
 
     xhr.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {

@@ -134,8 +134,13 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.listen(1337, function(){
-    console.log('Express server listening on port 1337');
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
+
+app.listen(port, function(){
+    console.log('Express server listening on port ' + port);
 });
 
 app.get('/api/top', function (req, res) {

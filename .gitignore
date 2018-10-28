@@ -3,3 +3,6 @@
 .idea/
 botconfig.json
 xp.json
+npm-debug.log
+.DS_Store
+/*.env
